@@ -1,0 +1,253 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > GETPredictions</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/highlight-idea.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">io.github.qa.belong.assignment.functions</a>
+</div>
+
+<h1>Coverage Summary for Class: GETPredictions (io.github.qa.belong.assignment.functions)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">GETPredictions</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (20/30)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">GETPredictions$</td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (2/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    71.4%
+  </span>
+  <span class="absValue">
+    (5/7)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    71.4%
+  </span>
+  <span class="absValue">
+    (5/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    67.6%
+  </span>
+  <span class="absValue">
+    (25/37)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<div class="sourceCode" id="sourceCode"><i class="no-highlight">1</i>&nbsp;/*
+<i class="no-highlight">2</i>&nbsp; * Copyright (c) Belong 2022. Not to be shared publicly.
+<i class="no-highlight">3</i>&nbsp; */
+<i class="no-highlight">4</i>&nbsp;package io.github.qa.belong.assignment.functions
+<i class="no-highlight">5</i>&nbsp;
+<i class="no-highlight">6</i>&nbsp;import org.apache.spark.sql.DataFrame
+<i class="no-highlight">7</i>&nbsp;import org.apache.spark.sql.expressions.Window
+<i class="no-highlight">8</i>&nbsp;import org.apache.spark.sql.functions.{col, desc, row_number, sum}
+<i class="no-highlight">9</i>&nbsp;
+<b class="fc"><i class="no-highlight">10</i>&nbsp;class GETPredictions extends Session {</b>
+<i class="no-highlight">11</i>&nbsp;
+<i class="no-highlight">12</i>&nbsp;  /**
+<i class="no-highlight">13</i>&nbsp;   * Get Daily preditions from given input variables
+<i class="no-highlight">14</i>&nbsp;   *
+<i class="no-highlight">15</i>&nbsp;   * @return
+<i class="no-highlight">16</i>&nbsp;   * {{{
+<i class="no-highlight">17</i>&nbsp;   *      sensorCounts
+<i class="no-highlight">18</i>&nbsp;   *.join(sensorLocations, &quot;sensor_id&quot;)
+<i class="no-highlight">19</i>&nbsp;   *.groupBy(&quot;location&quot;, &quot;year&quot;, &quot;month&quot;, &quot;mdate&quot;,&quot;sensor_description&quot;)
+<i class="no-highlight">20</i>&nbsp;   *.agg(sum(&quot;hourly_counts&quot;).alias(&quot;daily_count&quot;))
+<i class="no-highlight">21</i>&nbsp;   *.sort(desc(&quot;daily_count&quot;)).cache()
+<i class="no-highlight">22</i>&nbsp;   *
+<i class="no-highlight">23</i>&nbsp;   * }}}
+<i class="no-highlight">24</i>&nbsp;   */
+<i class="no-highlight">25</i>&nbsp;  def getDailyPredictions(config: Map[String, String]): DataFrame = {
+<b class="fc"><i class="no-highlight">26</i>&nbsp;    val sensorCounts = GetDF(config.getOrElse(&quot;sensorCountURL&quot;, &quot;https://data.melbourne.vic.gov.au/resource/b2ak-trbp.json&quot;))</b>
+<b class="fc"><i class="no-highlight">27</i>&nbsp;    val sensorLocations = GetDF(config.getOrElse(&quot;sensorLocationURL&quot;, &quot;https://data.melbourne.vic.gov.au/resource/h57g-5234.json&quot;))</b>
+<i class="no-highlight">28</i>&nbsp;
+<b class="fc"><i class="no-highlight">29</i>&nbsp;    sensorCounts</b>
+<b class="fc"><i class="no-highlight">30</i>&nbsp;      .join(sensorLocations, &quot;sensor_id&quot;)</b>
+<b class="fc"><i class="no-highlight">31</i>&nbsp;      .groupBy(&quot;location&quot;, &quot;year&quot;, &quot;month&quot;, &quot;mdate&quot;, &quot;sensor_description&quot;)</b>
+<b class="fc"><i class="no-highlight">32</i>&nbsp;      .agg(sum(&quot;hourly_counts&quot;).alias(&quot;daily_count&quot;))</b>
+<b class="fc"><i class="no-highlight">33</i>&nbsp;      .sort(desc(&quot;daily_count&quot;)).cache()</b>
+<i class="no-highlight">34</i>&nbsp;
+<i class="no-highlight">35</i>&nbsp;  }
+<i class="no-highlight">36</i>&nbsp;
+<i class="no-highlight">37</i>&nbsp;  /**
+<i class="no-highlight">38</i>&nbsp;   * Monthly rollup view of the predictions which produces per month basis
+<i class="no-highlight">39</i>&nbsp;   *
+<i class="no-highlight">40</i>&nbsp;   * @return dataframe
+<i class="no-highlight">41</i>&nbsp;   * {{{
+<i class="no-highlight">42</i>&nbsp;   *     getDailyPredictions()
+<i class="no-highlight">43</i>&nbsp;   *.groupBy(&quot;location&quot;, &quot;year&quot;, &quot;month&quot;)
+<i class="no-highlight">44</i>&nbsp;   *.agg(sum(&quot;daily_count&quot;).alias(&quot;monthly_count&quot;))
+<i class="no-highlight">45</i>&nbsp;   *.sort(desc(&quot;monthly_count&quot;))
+<i class="no-highlight">46</i>&nbsp;   *.limit(10)
+<i class="no-highlight">47</i>&nbsp;   * }}}
+<i class="no-highlight">48</i>&nbsp;   */
+<i class="no-highlight">49</i>&nbsp;  def getTopMonthlyPredictions(config: Map[String, String]): DataFrame = {
+<b class="fc"><i class="no-highlight">50</i>&nbsp;    getDailyPredictions(config)</b>
+<b class="fc"><i class="no-highlight">51</i>&nbsp;      .groupBy(&quot;location&quot;, &quot;year&quot;, &quot;month&quot;)</b>
+<b class="fc"><i class="no-highlight">52</i>&nbsp;      .agg(sum(&quot;daily_count&quot;).alias(&quot;monthly_count&quot;))</b>
+<b class="fc"><i class="no-highlight">53</i>&nbsp;      .withColumn(&quot;rank&quot;, row_number()</b>
+<b class="fc"><i class="no-highlight">54</i>&nbsp;        .over(Window</b>
+<b class="fc"><i class="no-highlight">55</i>&nbsp;          .partitionBy(&quot;year&quot;, &quot;month&quot;)</b>
+<b class="fc"><i class="no-highlight">56</i>&nbsp;          .orderBy(desc(&quot;monthly_count&quot;))))</b>
+<b class="fc"><i class="no-highlight">57</i>&nbsp;      .filter(col(&quot;rank&quot;).leq(10))</b>
+<b class="fc"><i class="no-highlight">58</i>&nbsp;      .withColumn(&quot;longitude&quot;, col(&quot;location.longitude&quot;))</b>
+<b class="fc"><i class="no-highlight">59</i>&nbsp;      .withColumn(&quot;latitude&quot;, col(&quot;location.latitude&quot;))</b>
+<b class="fc"><i class="no-highlight">60</i>&nbsp;      .withColumn(&quot;human_address&quot;, col(&quot;location.human_address&quot;))</b>
+<b class="fc"><i class="no-highlight">61</i>&nbsp;      .drop(&quot;rank&quot;, &quot;location&quot;)</b>
+<i class="no-highlight">62</i>&nbsp;  }
+<i class="no-highlight">63</i>&nbsp;
+<i class="no-highlight">64</i>&nbsp;  /**
+<i class="no-highlight">65</i>&nbsp;   * Daily rollup view of the predictions which produced per day basis..
+<i class="no-highlight">66</i>&nbsp;   *
+<i class="no-highlight">67</i>&nbsp;   * @return dataframe
+<i class="no-highlight">68</i>&nbsp;   * {{{
+<i class="no-highlight">69</i>&nbsp;   *               getDailyPredictions()
+<i class="no-highlight">70</i>&nbsp;   *.withColumn(&quot;rank&quot;,row_number()
+<i class="no-highlight">71</i>&nbsp;   *.over(Window
+<i class="no-highlight">72</i>&nbsp;   *.partitionBy (&quot;year&quot;,&quot;month&quot;,&quot;mdate&quot;)
+<i class="no-highlight">73</i>&nbsp;   *.orderBy(desc(&quot;daily_count&quot;))))
+<i class="no-highlight">74</i>&nbsp;   *.filter(col(&quot;rank&quot;).leq(10))
+<i class="no-highlight">75</i>&nbsp;   *.withColumn(&quot;longitude&quot;,col(&quot;location.longitude&quot;))
+<i class="no-highlight">76</i>&nbsp;   *.withColumn(&quot;latitude&quot;,col(&quot;location.latitude&quot;))
+<i class="no-highlight">77</i>&nbsp;   *.withColumn(&quot;human_address&quot;,col(&quot;location.human_address&quot;))
+<i class="no-highlight">78</i>&nbsp;   *.drop(&quot;rank&quot;,&quot;location&quot;)
+<i class="no-highlight">79</i>&nbsp;   * }}}
+<i class="no-highlight">80</i>&nbsp;   */
+<i class="no-highlight">81</i>&nbsp;  def getTopDailyPredictions(config: Map[String, String]): DataFrame = {
+<i class="no-highlight">82</i>&nbsp;
+<b class="nc"><i class="no-highlight">83</i>&nbsp;    getDailyPredictions(config)</b>
+<b class="nc"><i class="no-highlight">84</i>&nbsp;      .withColumn(&quot;rank&quot;, row_number()</b>
+<b class="nc"><i class="no-highlight">85</i>&nbsp;        .over(Window</b>
+<b class="nc"><i class="no-highlight">86</i>&nbsp;          .partitionBy(&quot;year&quot;, &quot;month&quot;, &quot;mdate&quot;)</b>
+<b class="nc"><i class="no-highlight">87</i>&nbsp;          .orderBy(desc(&quot;daily_count&quot;))))</b>
+<b class="nc"><i class="no-highlight">88</i>&nbsp;      .filter(col(&quot;rank&quot;).leq(10))</b>
+<b class="nc"><i class="no-highlight">89</i>&nbsp;      .withColumn(&quot;longitude&quot;, col(&quot;location.longitude&quot;))</b>
+<b class="nc"><i class="no-highlight">90</i>&nbsp;      .withColumn(&quot;latitude&quot;, col(&quot;location.latitude&quot;))</b>
+<b class="nc"><i class="no-highlight">91</i>&nbsp;      .withColumn(&quot;human_address&quot;, col(&quot;location.human_address&quot;))</b>
+<b class="nc"><i class="no-highlight">92</i>&nbsp;      .drop(&quot;rank&quot;, &quot;location&quot;)</b>
+<i class="no-highlight">93</i>&nbsp;
+<i class="no-highlight">94</i>&nbsp;    //SQL Equivalent
+<i class="no-highlight">95</i>&nbsp;    //    sparkSession.sql(
+<i class="no-highlight">96</i>&nbsp;    //      &quot;&quot;&quot;
+<i class="no-highlight">97</i>&nbsp;    //        |select sb.gps_location,sb.year,sb.month, sb.mdate, sb.daily_count from (
+<i class="no-highlight">98</i>&nbsp;    //        |select
+<i class="no-highlight">99</i>&nbsp;    //        |concat(&quot;(&quot;,location.latitude,&quot;,&quot;,location.longitude,&quot;)&quot;) as gps_location
+<i class="no-highlight">100</i>&nbsp;    //        |,year
+<i class="no-highlight">101</i>&nbsp;    //        |,month
+<i class="no-highlight">102</i>&nbsp;    //        |,mdate
+<i class="no-highlight">103</i>&nbsp;    //        |,daily_count
+<i class="no-highlight">104</i>&nbsp;    //        |,rank( ) over (partition by year,month,mdate order by daily_count desc) rk
+<i class="no-highlight">105</i>&nbsp;    //        |from dailyPredictions
+<i class="no-highlight">106</i>&nbsp;    //        |) sb where sb.rk&lt;=10
+<i class="no-highlight">107</i>&nbsp;    //        |&quot;&quot;&quot;.stripMargin
+<i class="no-highlight">108</i>&nbsp;    //    )
+<i class="no-highlight">109</i>&nbsp;  }
+<i class="no-highlight">110</i>&nbsp;
+<i class="no-highlight">111</i>&nbsp;}
+<i class="no-highlight">112</i>&nbsp;
+<i class="no-highlight">113</i>&nbsp;object GETPredictions {
+<b class="nc"><i class="no-highlight">114</i>&nbsp;  def apply(predictionType: String, config: Map[String, String] = Map[String, String]()): DataFrame = {</b>
+<b class="fc"><i class="no-highlight">115</i>&nbsp;    val predictios = new GETPredictions()</b>
+<b class="fc"><i class="no-highlight">116</i>&nbsp;    predictionType match {</b>
+<b class="fc"><i class="no-highlight">117</i>&nbsp;      case &quot;daily&quot; =&gt; predictios.getTopDailyPredictions(config)</b>
+<b class="fc"><i class="no-highlight">118</i>&nbsp;      case &quot;monthly&quot; =&gt; predictios.getTopMonthlyPredictions(config)</b>
+<b class="nc"><i class="no-highlight">119</i>&nbsp;      case _ =&gt; throw new Exception(&quot;Un-Implemented Prediction&quot;)</b>
+<i class="no-highlight">120</i>&nbsp;    }
+<i class="no-highlight">121</i>&nbsp;  }
+<b class="fc"><i class="no-highlight">122</i>&nbsp;}</b>
+</div>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+        var codeBlock = document.getElementById('sourceCode');
+
+        if (codeBlock) {
+            hljs.highlightBlock(codeBlock);
+        }
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2022-05-30 04:13</div>
+</div>
+</body>
+</html>
